@@ -115,14 +115,6 @@ class FunctionPulseTemplate(AtomicPulseTemplate, ParameterConstrainer):
                                 duration=duration,
                                 channel=channel_mapping[self.__channel])
 
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, 'Condition']) -> bool:
-        return any(
-            parameters[name].requires_stop
-            for name in parameters.keys() if (name in self.parameter_names)
-        )
-
     def get_serialization_data(self, serializer: Optional[Serializer]=None) -> Dict[str, Any]:
         data = super().get_serialization_data(serializer)
 

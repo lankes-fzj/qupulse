@@ -157,11 +157,6 @@ class RepetitionPulseTemplate(LoopPulseTemplate, ParameterConstrainer, Measureme
 
                 parent_loop.append_child(loop=repj_loop)
 
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, Condition]) -> bool:
-        return any(parameters[v].requires_stop for v in self.repetition_count.variables)
-
     def get_serialization_data(self, serializer: Optional[Serializer]=None) -> Dict[str, Any]:
         data = super().get_serialization_data(serializer)
         data['body'] = self.body

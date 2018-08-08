@@ -257,11 +257,6 @@ class ForLoopPulseTemplate(LoopPulseTemplate, MeasurementDefiner, ParameterConst
         return ForLoopWaveform([self.body.build_waveform(local_parameters)
                                 for local_parameters in self._body_parameter_generator(parameters, forward=True)])
 
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, 'Condition']) -> bool:
-        return any(parameters[parameter_name].requires_stop for parameter_name in self._loop_range.parameter_names)
-
     def get_serialization_data(self, serializer: Optional[Serializer]=None) -> Dict[str, Any]:
         data = super().get_serialization_data(serializer)
 
@@ -383,11 +378,6 @@ class WhileLoopPulseTemplate(LoopPulseTemplate):
                                  parent_loop: Loop) -> None:
         raise NotImplementedError("create_program() does not handle conditions/triggers right now and cannot "
                                   "be meaningfully implemented for a WhileLoopPulseTemplate")
-
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, Condition]) -> bool:
-        return self.__obtain_condition_object(conditions).requires_stop()
 
     def get_serialization_data(self, serializer: Optional[Serializer]=None) -> Dict[str, Any]:
         data = super().get_serialization_data(serializer)

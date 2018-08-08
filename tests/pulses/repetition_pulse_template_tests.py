@@ -484,7 +484,7 @@ class RepetitionPulseTemplateOldSequencingTests(unittest.TestCase):
         t = RepetitionPulseTemplate(self.body, repetitions)
         parameters = {}
         measurement_mapping = {'my': 'thy'}
-        conditions = dict(foo=DummyCondition(requires_stop=True))
+        conditions = dict(foo=DummyCondition())
         channel_mapping = {}
         t.build_sequence(self.sequencer, parameters, conditions, measurement_mapping, channel_mapping, self.block)
 
@@ -496,7 +496,7 @@ class RepetitionPulseTemplateOldSequencingTests(unittest.TestCase):
 
     def test_build_sequence_declaration_success(self) -> None:
         parameters = dict(foo=ConstantParameter(3))
-        conditions = dict(foo=DummyCondition(requires_stop=True))
+        conditions = dict(foo=DummyCondition())
         measurement_mapping = dict(moth='fire')
         channel_mapping = dict(asd='f')
         self.template.build_sequence(self.sequencer, parameters, conditions, measurement_mapping, channel_mapping, self.block)
@@ -510,7 +510,7 @@ class RepetitionPulseTemplateOldSequencingTests(unittest.TestCase):
 
     def test_parameter_not_provided(self):
         parameters = dict(foo=ConstantParameter(4))
-        conditions = dict(foo=DummyCondition(requires_stop=True))
+        conditions = dict(foo=DummyCondition())
         measurement_mapping = dict(moth='fire')
         channel_mapping = dict(asd='f')
 
@@ -522,21 +522,21 @@ class RepetitionPulseTemplateOldSequencingTests(unittest.TestCase):
 
     def test_build_sequence_declaration_exceeds_bounds(self) -> None:
         parameters = dict(foo=ConstantParameter(9))
-        conditions = dict(foo=DummyCondition(requires_stop=True))
+        conditions = dict(foo=DummyCondition())
         with self.assertRaises(ParameterConstraintViolation):
             self.template.build_sequence(self.sequencer, parameters, conditions, {}, {}, self.block)
         self.assertFalse(self.sequencer.sequencing_stacks)
 
     def test_build_sequence_declaration_parameter_missing(self) -> None:
         parameters = {}
-        conditions = dict(foo=DummyCondition(requires_stop=True))
+        conditions = dict(foo=DummyCondition())
         with self.assertRaises(ParameterNotProvidedException):
             self.template.build_sequence(self.sequencer, parameters, conditions, {}, {}, self.block)
         self.assertFalse(self.sequencer.sequencing_stacks)
 
     def test_build_sequence_declaration_parameter_value_not_whole(self) -> None:
         parameters = dict(foo=ConstantParameter(3.3))
-        conditions = dict(foo=DummyCondition(requires_stop=True))
+        conditions = dict(foo=DummyCondition())
         with self.assertRaises(ParameterNotIntegerException):
             self.template.build_sequence(self.sequencer, parameters, conditions, {}, {}, self.block)
         self.assertFalse(self.sequencer.sequencing_stacks)
@@ -577,30 +577,6 @@ class RepetitionPulseTemplateOldSequencingTests(unittest.TestCase):
 
         self.assertFalse(self.block.embedded_blocks)  # no new blocks created
         self.assertFalse(self.block.instructions)  # no instructions added to block
-
-    def test_requires_stop_constant(self) -> None:
-        body = DummyPulseTemplate(requires_stop=False)
-        t = RepetitionPulseTemplate(body, 2)
-        self.assertFalse(t.requires_stop({}, {}))
-        body.requires_stop_ = True
-        self.assertFalse(t.requires_stop({}, {}))
-
-    def test_requires_stop_declaration(self) -> None:
-        body = DummyPulseTemplate(requires_stop=False)
-        t = RepetitionPulseTemplate(body, 'foo')
-
-        parameter = DummyParameter()
-        parameters = dict(foo=parameter)
-        condition = DummyCondition()
-        conditions = dict(foo=condition)
-
-        for body_requires_stop in [True, False]:
-            for condition_requires_stop in [True, False]:
-                for parameter_requires_stop in [True, False]:
-                    body.requires_stop_ = body_requires_stop
-                    condition.requires_stop_ = condition_requires_stop
-                    parameter.requires_stop_ = parameter_requires_stop
-                    self.assertEqual(parameter_requires_stop, t.requires_stop(parameters, conditions))
 
 
 class RepetitionPulseTemplateSerializationTests(SerializableTests, unittest.TestCase):

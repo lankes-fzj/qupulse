@@ -188,12 +188,6 @@ class FunctionPulseSequencingTest(FunctionPulseTest):
         expected_waveform = FunctionWaveform(expression, duration=duration, channel='B')
         self.assertEqual(expected_waveform, wf)
 
-    def test_requires_stop(self) -> None:
-        parameters = dict(a=DummyParameter(36.126), z=DummyParameter(247.9543))
-        self.assertFalse(self.fpt.requires_stop(parameters, dict()))
-        parameters = dict(a=DummyParameter(36.126), z=DummyParameter(247.9543, requires_stop=True))
-        self.assertTrue(self.fpt.requires_stop(parameters, dict()))
-
     def test_build_waveform_none(self):
         self.assertIsNone(self.fpt.build_waveform(self.valid_par_vals, channel_mapping={'A': None}))
 

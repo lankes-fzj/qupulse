@@ -150,17 +150,6 @@ class AtomicMultiChannelPulseTemplateTest(unittest.TestCase):
 
 class MultiChannelPulseTemplateSequencingTests(unittest.TestCase):
 
-    def test_requires_stop(self):
-        sts = [DummyPulseTemplate(duration='t1', defined_channels={'A'}, parameter_names={'a', 'b'}, requires_stop=False),
-               DummyPulseTemplate(duration='t1', defined_channels={'B'}, parameter_names={'a', 'c'}, requires_stop=False)]
-
-        self.assertFalse(AtomicMultiChannelPulseTemplate(*sts).requires_stop(dict(), dict()))
-        sts = [
-            DummyPulseTemplate(duration='t1', defined_channels={'A'}, parameter_names={'a', 'b'}, requires_stop=False),
-            DummyPulseTemplate(duration='t1', defined_channels={'B'}, parameter_names={'a', 'c'}, requires_stop=True)]
-
-        self.assertTrue(AtomicMultiChannelPulseTemplate(*sts).requires_stop(dict(), dict()))
-
     def test_build_waveform(self):
         wfs = [DummyWaveform(duration=1.1, defined_channels={'A'}), DummyWaveform(duration=1.1, defined_channels={'B'})]
 

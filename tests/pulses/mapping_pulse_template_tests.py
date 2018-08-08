@@ -364,10 +364,6 @@ class MappingPulseTemplateOldSequencingTests(unittest.TestCase):
                          st.get_updated_channel_mapping(pre_channel_mapping))
         self.assertEqual(forwarded_args[5], block)
 
-    @unittest.skip("Extend of dummy template for argument checking needed.")
-    def test_requires_stop(self):
-        pass
-
 
 class PulseTemplateParameterMappingExceptionsTests(unittest.TestCase):
 

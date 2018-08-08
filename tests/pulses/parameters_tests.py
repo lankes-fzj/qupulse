@@ -17,10 +17,6 @@ class ConstantParameterTest(unittest.TestCase):
         self.__test_valid_params(0)
         self.__test_valid_params(0.3)
 
-    def test_requires_stop(self) -> None:
-        constant_parameter = ConstantParameter(0.3)
-        self.assertFalse(constant_parameter.requires_stop)
-
     def test_repr(self) -> None:
         constant_parameter = ConstantParameter(0.2)
         self.assertEqual("<ConstantParameter 0.2>", repr(constant_parameter))
@@ -28,30 +24,21 @@ class ConstantParameterTest(unittest.TestCase):
 
 class MappedParameterTest(unittest.TestCase):
 
-    def test_requires_stop_and_get_value(self) -> None:
+    def test_get_value(self) -> None:
         p = MappedParameter(Expression("foo + bar * hugo"))
-        with self.assertRaises(ParameterNotProvidedException):
-            p.requires_stop
         with self.assertRaises(ParameterNotProvidedException):
             p.get_value()
 
         foo = DummyParameter(-1.1)
         bar = DummyParameter(0.5)
-        hugo = DummyParameter(5.2, requires_stop=True)
-        ilse = DummyParameter(2356.4, requires_stop=True)
+        hugo = DummyParameter(5.2)
+        ilse = DummyParameter(2356.4)
 
         p.dependencies = {'foo': foo, 'bar': bar, 'ilse': ilse}
         with self.assertRaises(ParameterNotProvidedException):
-            p.requires_stop
-        with self.assertRaises(ParameterNotProvidedException):
             p.get_value()
 
-        p.dependencies = {'foo': foo, 'bar': bar, 'hugo': hugo}
-        self.assertTrue(p.requires_stop)
-
-        hugo = DummyParameter(5.2, requires_stop=False)
         p.dependencies = {'foo': foo, 'bar': bar, 'hugo': hugo, 'ilse': ilse}
-        self.assertFalse(p.requires_stop)
         self.assertEqual(1.5, p.get_value())
 
     def test_repr(self) -> None:

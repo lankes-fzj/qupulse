@@ -133,17 +133,6 @@ class PointPulseTemplate(AtomicPulseTemplate, ParameterConstrainer):
     def parameter_names(self) -> Set[str]:
         return self.point_parameters | self.measurement_parameters | self.constrained_parameters
 
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, Condition]) -> bool:
-        try:
-            return any(
-                parameters[name].requires_stop
-                for name in self.parameter_names
-            )
-        except KeyError as key_error:
-            raise ParameterNotProvidedException(str(key_error)) from key_error
-
     @property
     def integral(self) -> Dict[ChannelID, ExpressionScalar]:
         expressions = {channel: 0 for channel in self._channels}

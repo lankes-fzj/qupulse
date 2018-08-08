@@ -130,13 +130,6 @@ class SequencePulseTemplate(PulseTemplate, ParameterConstrainer, MeasurementDefi
         return set.union(MeasurementDefiner.measurement_names.fget(self),
                          *(st.measurement_names for st in self.subtemplates))
 
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, 'Condition']) -> bool:
-        """Returns the stop requirement of the first subtemplate. If a later subtemplate requires a stop the
-        SequencePulseTemplate can be partially sequenced."""
-        return self.__subtemplates[0].requires_stop(parameters, conditions) if self.__subtemplates else False
-
     def build_waveform(self,
                        parameters: Dict[str, Real],
                        channel_mapping: Dict[ChannelID, ChannelID]) -> SequenceWaveform:

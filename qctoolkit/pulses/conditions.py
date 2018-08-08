@@ -32,15 +32,6 @@ class Condition(metaclass=ABCMeta):
         super().__init__()
         
     @abstractmethod
-    def requires_stop(self) -> bool:
-        """Query whether evaluating this Condition object requires an interruption in execution/
-        sequencing,  e.g. because it depends on a value obtained during executin.
-
-        Returns:
-            True, if evaluation of this Condition object requires sequencing to be interrupted.
-        """
-        
-    @abstractmethod
     def build_sequence_loop(self, 
                             delegator: SequencingElement,
                             body: SequencingElement,

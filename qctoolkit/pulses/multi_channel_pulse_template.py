@@ -130,11 +130,6 @@ class AtomicMultiChannelPulseTemplate(AtomicPulseTemplate, ParameterConstrainer)
                                                            measurement_mapping=measurement_mapping))
         return measurements
 
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, 'Condition']) -> bool:
-        return any(st.requires_stop(parameters, conditions) for st in self._subtemplates)
-
     def get_serialization_data(self, serializer: Optional[Serializer]=None) -> Dict[str, Any]:
         data = super().get_serialization_data(serializer)
         data['subtemplates'] = self.subtemplates

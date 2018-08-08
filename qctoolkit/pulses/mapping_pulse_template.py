@@ -286,14 +286,6 @@ class MappingPulseTemplate(PulseTemplate, ParameterConstrainer):
             parameters=self.map_parameters(parameters),
             channel_mapping=self.get_updated_channel_mapping(channel_mapping))
 
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, Condition]) -> bool:
-        return self.template.requires_stop(
-            self.map_parameters(parameters),
-            conditions
-        )
-
     @property
     def integral(self) -> Dict[ChannelID, ExpressionScalar]:
         internal_integral = self.__template.integral

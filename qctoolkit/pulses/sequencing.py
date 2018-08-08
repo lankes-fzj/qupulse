@@ -60,31 +60,6 @@ class SequencingElement(metaclass=ABCMeta):
         :return:
         """
 
-    @abstractmethod
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, 'conditions.Condition']) -> bool:
-        """Return True if this SequencingElement cannot be translated yet.
-
-        Sequencer will check requires_stop() before calling build_sequence(). If requires_stop()
-        returns True, Sequencer interrupts the current translation process and will not call
-        build_sequence().
-
-        Implementation guide: requires_stop() should only return True, if this SequencingElement
-        cannot be translated, i.e., the return value should only depend on the parameters/conditions
-        of this SequencingElement, not on possible child elements.
-        If this SequencingElement contains a child element which requires a stop, it should be
-        pushed to the sequencing stack nonetheless. The requires_stop information of the child
-        will be regarded during translation of that element.
-
-        Args:
-            parameters (Dict(str -> Parameter)): A mapping of parameter names to Parameter objects.
-            conditions (Dict(str -> Condition)): A mapping of condition identifiers to Condition
-                objects.
-        Returns:
-            True, if this SequencingElement cannot be translated yet. False, otherwise.
-        """
-
 
 class Sequencer:
     """Translates tree structures of SequencingElement objects to linear instruction sequences.
@@ -174,10 +149,7 @@ class Sequencer:
         """Start the translation process. Translate all elements currently on the translation stacks
         into an InstructionBlock hierarchy.
 
-        Processes all sequencing stacks (for each InstructionBlock) until each stack is either
-        empty or its topmost element requires a stop. If build is called after a previous
-        translation process where some elements required a stop (i.e., has_finished returned False),
-        it will append new instructions to the previously generated and returned blocks.
+        Processes all sequencing stacks (for each InstructionBlock) until each stack is empty.
 
         Returns:
             The instruction block (hierarchy) resulting from the translation of the (remaining)
@@ -191,12 +163,10 @@ class Sequencer:
                 for target_block, sequencing_stack in self.__sequencing_stacks.copy().items():
                     while sequencing_stack:
                         (element, parameters, conditions, window_mapping, channel_mapping) = sequencing_stack[-1]
-                        if not element.requires_stop(parameters, conditions):
-                            shall_continue |= True
-                            sequencing_stack.pop()
-                            element.build_sequence(self, parameters, conditions, window_mapping,
-                                                   channel_mapping, target_block)
-                        else: break
+                        shall_continue |= True
+                        sequencing_stack.pop()
+                        element.build_sequence(self, parameters, conditions, window_mapping,
+                                               channel_mapping, target_block)
 
         return ImmutableInstructionBlock(self.__main_block, dict())
 

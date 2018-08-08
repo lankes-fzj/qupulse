@@ -363,8 +363,8 @@ class SequencePulseTemplateSequencingTests(MeasurementWindowTestCase):
 
 class SequencePulseTemplateOldSequencingTests(SequencePulseTemplateTest):
     def test_build_sequence(self) -> None:
-        sub1 = DummyPulseTemplate(requires_stop=False)
-        sub2 = DummyPulseTemplate(requires_stop=True, parameter_names={'foo'})
+        sub1 = DummyPulseTemplate()
+        sub2 = DummyPulseTemplate(parameter_names={'foo'})
         parameters = {'foo': DummyNoValueParameter()}
 
         sequencer = DummySequencer()
@@ -384,24 +384,6 @@ class SequencePulseTemplateOldSequencingTests(SequencePulseTemplateTest):
         seq = SequencePulseTemplate((sub2, {'foo': 'foo'}), sub1)
         seq.build_sequence(sequencer, parameters, {}, {}, {}, block)
         self.assertEqual(2, len(sequencer.sequencing_stacks[block]))
-
-    @unittest.skip("Was this test faulty before? Why should the three last cases return false?")
-    def test_requires_stop(self) -> None:
-        sub1 = (DummyPulseTemplate(requires_stop=False), {}, {})
-        sub2 = (DummyPulseTemplate(requires_stop=True, parameter_names={'foo'}), {'foo': 'foo'}, {})
-        parameters = {'foo': DummyNoValueParameter()}
-
-        seq = SequencePulseTemplate(sub1)
-        self.assertFalse(seq.requires_stop(parameters, {}))
-
-        seq = SequencePulseTemplate(sub2)
-        self.assertFalse(seq.requires_stop(parameters, {}))
-
-        seq = SequencePulseTemplate(sub1, sub2)
-        self.assertFalse(seq.requires_stop(parameters, {}))
-
-        seq = SequencePulseTemplate(sub2, sub1)
-        self.assertFalse(seq.requires_stop(parameters, {}))
 
     def test_crash(self) -> None:
         table = TablePulseTemplate({'default': [('ta', 'va', 'hold'),
@@ -437,7 +419,6 @@ class SequencePulseTemplateOldSequencingTests(SequencePulseTemplateTest):
 
         sequencer = DummySequencer()
         block = DummyInstructionBlock()
-        self.assertFalse(sequence.requires_stop(parameters, {}))
         sequence.build_sequence(sequencer,
                                 parameters=parameters,
                                 conditions={},

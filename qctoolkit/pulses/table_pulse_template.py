@@ -218,17 +218,6 @@ class TablePulseTemplate(AtomicPulseTemplate, ParameterConstrainer):
     def defined_channels(self) -> Set[ChannelID]:
         return set(self._entries.keys())
 
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, 'Condition']) -> bool:
-        try:
-            return any(
-                parameters[name].requires_stop
-                for name in self.parameter_names
-            )
-        except KeyError as key_error:
-            raise ParameterNotProvidedException(str(key_error)) from key_error
-
     def get_serialization_data(self, serializer: Optional[Serializer]=None) -> Dict[str, Any]:
         data = super().get_serialization_data(serializer)
 

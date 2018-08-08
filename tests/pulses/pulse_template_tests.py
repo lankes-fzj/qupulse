@@ -81,11 +81,6 @@ class PulseTemplateStub(PulseTemplate):
     def measurement_names(self):
         return self._measurement_names
 
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, 'Condition']):
-        raise NotImplementedError()
-
     @property
     def integral(self) -> Dict[ChannelID, ExpressionScalar]:
         raise NotImplementedError()
@@ -110,11 +105,6 @@ class AtomicPulseTemplateStub(AtomicPulseTemplate):
         self.retrieved_parameters.append(parameters)
         self.retrieved_channel_mapping.append(channel_mapping)
         return self.waveform
-
-    def requires_stop(self,
-                      parameters: Dict[str, Parameter],
-                      conditions: Dict[str, 'Condition']) -> bool:
-        return False
 
     @property
     def defined_channels(self) -> Set['ChannelID']:

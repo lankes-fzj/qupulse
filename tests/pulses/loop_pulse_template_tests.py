@@ -410,17 +410,6 @@ class ForLoopTemplateOldSequencingTests(unittest.TestCase):
 
         self.assertEqual(sequencer.sequencing_stacks[block], expected_stack)
 
-    def test_requires_stop(self):
-        parameters = dict(A=DummyParameter(requires_stop=False), B=DummyParameter(requires_stop=False))
-
-        dt = DummyPulseTemplate(parameter_names={'i'})
-        flt = ForLoopPulseTemplate(body=dt, loop_index='i', loop_range=('A', 'B'))
-
-        self.assertFalse(flt.requires_stop(parameters, dict()))
-
-        parameters['A'] = DummyParameter(requires_stop=True)
-        self.assertTrue(flt.requires_stop(parameters, dict()))
-
 
 class ForLoopPulseTemplateSerializationTests(SerializableTests, unittest.TestCase):
 
@@ -588,20 +577,6 @@ class WhileLoopPulseTemplateTest(unittest.TestCase):
 
 class WhileLoopPulseTemplateSequencingTests(unittest.TestCase):
 
-    def test_requires_stop(self) -> None:
-        condition = DummyCondition(requires_stop=False)
-        conditions = {'foo_cond': condition}
-        body = DummyPulseTemplate(requires_stop=False)
-        t = WhileLoopPulseTemplate('foo_cond', body)
-        self.assertFalse(t.requires_stop({}, conditions))
-
-        condition.requires_stop_ = True
-        self.assertTrue(t.requires_stop({}, conditions))
-
-        body.requires_stop_ = True
-        condition.requires_stop_ = False
-        self.assertFalse(t.requires_stop({}, conditions))
-
     def test_build_sequence(self) -> None:
         condition = DummyCondition()
         body = DummyPulseTemplate()
@@ -628,13 +603,12 @@ class WhileLoopPulseTemplateSequencingTests(unittest.TestCase):
         self.assertFalse(sequencer.sequencing_stacks)
 
     def test_condition_missing(self) -> None:
-        body = DummyPulseTemplate(requires_stop=False)
+        body = DummyPulseTemplate()
         t = WhileLoopPulseTemplate('foo_cond', body)
         sequencer = DummySequencer()
         block = DummyInstructionBlock()
         with self.assertRaises(ConditionMissingException):
-            t.requires_stop({}, {})
-            t.build_sequence(sequencer, {}, {}, {}, block)
+            t.build_sequence(sequencer, {}, {}, {}, {}, block)
 
 
 class WhileLoopPulseTemplateSerializationTests(SerializableTests, unittest.TestCase):

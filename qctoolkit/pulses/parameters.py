@@ -36,17 +36,6 @@ class Parameter(metaclass=DocStringABCMeta):
     def get_value(self) -> Real:
         """Compute and return the parameter value."""
 
-    @property
-    @abstractmethod
-    def requires_stop(self) -> bool:
-        """Query whether the evaluation of this Parameter instance requires an interruption in
-        execution/sequencing, e.g., because it depends on data that is only measured in during the
-        next execution.
-
-        Returns:
-            True, if evaluating this Parameter instance requires an interruption.
-        """
-
     @abstractmethod
     def __hash__(self) -> int:
         pass
@@ -75,10 +64,6 @@ class ConstantParameter(Parameter):
 
     def __hash__(self) -> int:
         return hash(self._value)
-
-    @property
-    def requires_stop(self) -> bool:
-        return False
 
     def __repr__(self) -> str:
         return "<ConstantParameter {0}>".format(self._value)
@@ -129,15 +114,6 @@ class MappedParameter(Parameter):
 
     def __hash__(self):
         return hash(tuple(self.dependencies.items()))
-
-    @property
-    def requires_stop(self) -> bool:
-        """Does not explicitly check that all parameters are provided if one requires stopping"""
-        try:
-            return any(self.dependencies[v].requires_stop
-                       for v in self._expression.variables)
-        except KeyError as err:
-            raise ParameterNotProvidedException(err.args[0]) from err
 
     def __repr__(self) -> str:
         try:

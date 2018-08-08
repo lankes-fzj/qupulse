@@ -632,26 +632,6 @@ class TablePulseTemplateSequencingTests(unittest.TestCase):
         table = TablePulseTemplate(dict(a=[('t', 0)]))
         self.assertIsNone(table.build_waveform(dict(t=0), dict(a='a')))
 
-    def test_requires_stop_missing_param(self) -> None:
-        table = TablePulseTemplate({0: [('foo', 'v')]})
-        with self.assertRaises(ParameterNotProvidedException):
-            table.requires_stop({'foo': DummyParameter(0, False)}, {})
-
-    def test_requires_stop(self) -> None:
-        table = TablePulseTemplate({0: [('foo', 'v'),
-                                        ('bar', 0)]})
-        test_sets = [(False, {'foo': DummyParameter(0, False), 'bar': DummyParameter(0, False), 'v': DummyParameter(0, False)}, {'foo': DummyCondition(False)}),
-                     (False, {'foo': DummyParameter(0, False), 'bar': DummyParameter(0, False), 'v': DummyParameter(0, False)}, {'foo': DummyCondition(True)}),
-                     (True, {'foo': DummyParameter(0, True), 'bar': DummyParameter(0, False), 'v': DummyParameter(0, False)}, {'foo': DummyCondition(False)}),
-                     (True, {'foo': DummyParameter(0, True), 'bar': DummyParameter(0, False), 'v': DummyParameter(0, False)}, {'foo': DummyCondition(True)}),
-                     (True, {'foo': DummyParameter(0, False), 'bar': DummyParameter(0, False), 'v': DummyParameter(0, True)}, {'foo': DummyCondition(False)}),
-                     (True, {'foo': DummyParameter(0, False), 'bar': DummyParameter(0, False), 'v': DummyParameter(0, True)}, {'foo': DummyCondition(True)}),
-                     (True, {'foo': DummyParameter(0, True), 'bar': DummyParameter(0, True), 'v': DummyParameter(0, True)}, {'foo': DummyCondition(False)}),
-                     (True, {'foo': DummyParameter(0, True), 'bar': DummyParameter(0, True), 'v': DummyParameter(0, True)}, {'foo': DummyCondition(True)})]
-        for expected_result, parameter_set, condition_set in test_sets:
-            self.assertEqual(expected_result, table.requires_stop(parameter_set, condition_set))
-
-
 
 class TablePulseConcatenationTests(unittest.TestCase):
     def test_simple_concatenation(self):

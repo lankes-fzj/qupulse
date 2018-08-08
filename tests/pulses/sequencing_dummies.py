@@ -30,17 +30,12 @@ class MeasurementWindowTestCase(unittest.TestCase):
 
 class DummyParameter(Parameter):
 
-    def __init__(self, value: float = 0, requires_stop: bool = False) -> None:
+    def __init__(self, value: float = 0) -> None:
         super().__init__()
         self.value = value
-        self.requires_stop_ = requires_stop
 
     def get_value(self) -> float:
         return self.value
-
-    @property
-    def requires_stop(self) -> bool:
-        return self.requires_stop_
 
     def __hash__(self):
         return hash(self.value)
@@ -52,6 +47,7 @@ class DummyParameter(Parameter):
     def deserialize(cls, serializer: Optional[Serializer]=None) -> 'DummyParameter':
         raise NotImplementedError()
 
+
 class DummyNoValueParameter(Parameter):
 
     def __init__(self) -> None:
@@ -59,10 +55,6 @@ class DummyNoValueParameter(Parameter):
 
     def get_value(self) -> float:
         raise Exception("May not call get_value on DummyNoValueParameter.")
-
-    @property
-    def requires_stop(self) -> bool:
-        return True
 
     def get_serialization_data(self, serializer: Optional[Serializer]=None) -> None:
             raise NotImplementedError()
@@ -76,16 +68,14 @@ class DummyNoValueParameter(Parameter):
 
 class DummySequencingElement(SequencingElement):
 
-    def __init__(self, requires_stop: bool = False, push_elements: Tuple[InstructionBlock, List[SequencingElement]] = None) -> None:
+    def __init__(self, push_elements: Tuple[InstructionBlock, List[SequencingElement]] = None) -> None:
         super().__init__()
         self.build_call_counter = 0
-        self.requires_stop_call_counter = 0
         self.target_block = None
         self.parameters = None
         self.conditions = None
         self.window_mapping = None
         self.channel_mapping =  None
-        self.requires_stop_ = requires_stop
         self.push_elements = push_elements
         self.parameter_names = set()
         self.condition_names = set()
@@ -111,12 +101,6 @@ class DummySequencingElement(SequencingElement):
                                window_mapping=measurement_mapping,
                                channel_mapping=channel_mapping,
                                target_block=self.push_elements[0])
-
-    def requires_stop(self, parameters: Dict[str, Parameter], conditions: Dict[str, 'Conditions']) -> bool:
-        self.requires_stop_call_counter += 1
-        self.parameters = parameters
-        self.conditions = conditions
-        return self.requires_stop_
 
     @property
     def atomicity(self):
@@ -250,14 +234,10 @@ class DummyInterpolationStrategy(InterpolationStrategy):
 
 class DummyCondition(Condition):
 
-    def __init__(self, requires_stop: bool=False):
+    def __init__(self):
         super().__init__()
-        self.requires_stop_ = requires_stop
         self.loop_call_data = {}
         self.branch_call_data = {}
-
-    def requires_stop(self) -> bool:
-        return self.requires_stop_
 
     def build_sequence_loop(self,
                             delegator: SequencingElement,
@@ -305,7 +285,6 @@ class DummyCondition(Condition):
 class DummyPulseTemplate(AtomicPulseTemplate):
 
     def __init__(self,
-                 requires_stop: bool=False,
                  is_interruptable: bool=False,
                  parameter_names: Set[str]={},
                  defined_channels: Set[ChannelID]={'default'},
@@ -318,8 +297,6 @@ class DummyPulseTemplate(AtomicPulseTemplate):
                  identifier=None,
                  registry=None) -> None:
         super().__init__(identifier=identifier, measurements=measurements)
-        self.requires_stop_ = requires_stop
-        self.requires_stop_arguments = []
 
         self.is_interruptable_ = is_interruptable
         self.parameter_names_ = parameter_names
@@ -394,15 +371,10 @@ class DummyPulseTemplate(AtomicPulseTemplate):
             return self.waveform
         return DummyWaveform(duration=self.duration.evaluate_numeric(**parameters), defined_channels=self.defined_channels)
 
-    def requires_stop(self, parameters: Dict[str, Parameter], conditions: Dict[str, Condition]) -> bool:
-        self.requires_stop_arguments.append((parameters,conditions))
-        return self.requires_stop_
-
     def get_serialization_data(self, serializer: Optional['Serializer']=None) -> Dict[str, Any]:
         data = super().get_serialization_data(serializer=serializer)
         if serializer: # compatibility with old serialization routines
             data = dict()
-        data['requires_stop'] = self.requires_stop_
         data['is_interruptable'] = self.is_interruptable
         data['parameter_names'] = self.parameter_names
         data['defined_channels'] = self.defined_channels
@@ -417,7 +389,7 @@ class DummyPulseTemplate(AtomicPulseTemplate):
 
     @property
     def compare_key(self) -> Tuple[Any]:
-        return (self.requires_stop_, self.is_interruptable, self.parameter_names,
+        return (self.is_interruptable, self.parameter_names,
                 self.defined_channels, self.duration, self.waveform, self.measurement_names, self.integral)
 
     def __eq__(self, other) -> bool:

@@ -25,48 +25,6 @@ class TableSequenceSequencerIntegrationTests(unittest.TestCase):
         seqt = SequencePulseTemplate(MappingPulseTemplate(t1, measurement_mapping={'foo': 'bar'}),
                                      MappingPulseTemplate(t2, parameter_mapping={'bar': '2 * hugo'}))
 
-        with self.assertRaises(ParameterNotProvidedException):
-            t1.requires_stop(dict(), dict())
-        with self.assertRaises(ParameterNotProvidedException):
-            t2.requires_stop(dict(), dict())
-        self.assertFalse(seqt.requires_stop({'foo': DummyParameter(), 'hugo': DummyParameter()}, {}))
-
-        foo = DummyNoValueParameter()
-        bar = DummyNoValueParameter()
-        sequencer = Sequencer()
-        sequencer.push(seqt, {'foo': foo, 'hugo': bar},
-                       window_mapping=dict(bar='my', foo='thy'),
-                       channel_mapping={'default': 'A'})
-        instructions = sequencer.build()
-        self.assertFalse(sequencer.has_finished())
-        self.assertEqual(1, len(instructions))
-
-        # stop after first TablePT
-        foo = DummyParameter(value=1.1)
-        bar = DummyNoValueParameter()
-        sequencer = Sequencer()
-        sequencer.push(seqt, {'foo': foo, 'hugo': bar},
-                       window_mapping=dict(bar='my', foo='thy'),
-                       channel_mapping={'default': 'A'})
-        block = sequencer.build()
-        instructions = block.instructions
-        self.assertFalse(sequencer.has_finished())
-        self.assertIsInstance(block, AbstractInstructionBlock)
-        self.assertEqual(2, len(instructions))
-        self.assertEqual(instructions[0], MEASInstruction([('my', 2, 2)]))
-        self.assertIsInstance(instructions[1], EXECInstruction)
-
-        # stop before first TablePT
-        foo = DummyParameter(value=1.1)
-        bar = DummyNoValueParameter()
-        sequencer = Sequencer()
-        sequencer.push(seqt, {'foo': bar, 'hugo': foo},
-                       window_mapping=dict(bar='my', foo='thy'),
-                       channel_mapping={'default': 'A'})
-        instructions = sequencer.build()
-        self.assertFalse(sequencer.has_finished())
-        self.assertEqual(1, len(instructions))
-
         foo = DummyParameter(value=1.1)
         bar = DummyParameter(value=-0.2)
         sequencer = Sequencer()
